@@ -5,7 +5,8 @@ class AuthService {
   //Login Function
 
   //Register Function
-
+  Future registerUserWithEmailAndPassword(
+      String fullName, String email, String password) async {}
   //SignOut Function
 
 }
