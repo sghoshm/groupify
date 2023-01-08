@@ -1,8 +1,10 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:groupify/helper/helper_function.dart';
 import 'package:groupify/pages/auth/login_page.dart';
 
 import 'package:groupify/pages/auth/terms_of_use.dart';
+import 'package:groupify/pages/home_page.dart';
 import 'package:groupify/service/auth_service.dart';
 
 import '../../widgets/widgets.dart';
@@ -194,9 +196,14 @@ class _RegisterPageState extends State<RegisterPage> {
       });
       await authService
           .registerUserWithEmailAndPassword(fullName, email, password)
-          .then((value) {
+          .then((value) async {
         if (value == true) {
+          await HelperFunctions.saveUserLoggedInStatus(true);
+          await HelperFunctions.saveUserNameSF(fullName);
+          await HelperFunctions.saveUserEmailSF(email);
+          nextScreenReplace(context, const HomePage());
         } else {
+          showSnackbar(context, Colors.red, value);
           setState(() {
             _isLoading = false;
           });
