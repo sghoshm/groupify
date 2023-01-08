@@ -14,4 +14,4 @@ Create or join a group to start chatting and collaborating with your friends and
 We welcome contributions to Groupify! If you have an idea for a new feature 💡 or have found a bug 🐛, please open an issue on our GitHub repository 🐙.
 
 📜 License 📜
-Groupify is licensed under the MIT License. See [![License: MIT](groupify\LICENSE.md)] for more information.
+Groupify is licensed under the MIT License. See [![License: MIT](LICENSE.md)] for more information.
