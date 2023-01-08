@@ -6,7 +6,9 @@ class AuthService {
 
   //Register Function
   Future registerUserWithEmailAndPassword(
-      String fullName, String email, String password) async {}
+      String fullName, String email, String password) async {
+    try {} on FirebaseAuthException catch (e) {}
+  }
   //SignOut Function
 
 }
