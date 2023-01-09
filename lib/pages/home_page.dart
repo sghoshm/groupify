@@ -1,7 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:groupify/pages/auth/login_page.dart';
 import 'package:groupify/pages/search_page.dart';
 import 'package:groupify/service/auth_service.dart';
+import 'package:groupify/service/database_service.dart';
 import 'package:groupify/widgets/widgets.dart';
 
 import '../helper/helper_function.dart';
@@ -18,6 +20,7 @@ class _HomePageState extends State<HomePage> {
   String userName = "";
   String email = "";
   String phoneNumber = "";
+  Stream? groups;
   @override
   void initState() {
     super.initState();
@@ -38,6 +41,14 @@ class _HomePageState extends State<HomePage> {
     await HelperFunctions.getPhoneNumberFromSF().then((value) {
       setState(() {
         phoneNumber = value!;
+      });
+    });
+    //getting the list of snapshots of groups
+    await DatabaseService(uid: FirebaseAuth.instance.currentUser!.uid)
+        .getUserGroups()
+        .then((snapshot) {
+      setState(() {
+        groups = snapshot;
       });
     });
   }
@@ -204,5 +215,19 @@ class _HomePageState extends State<HomePage> {
         });
   }
 
-  groupList() {}
+  groupList() {
+    return StreamBuilder(
+      stream: groups,
+      builder: (context, AsyncSnapshot snapshot) {
+        if (snapshot.hasData) {
+          LoginPage();
+        } else {
+          return Center(
+              child: CircularProgressIndicator(
+            color: Theme.of(context).primaryColor,
+          ));
+        }
+      },
+    );
+  }
 }
