@@ -154,7 +154,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 Text(
                   widget.userName,
-                  style: const TextStyle(fontSize: 20),
+                  style: const TextStyle(fontSize: 17),
                 ),
               ],
             ),
@@ -171,7 +171,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 Text(
                   widget.email,
-                  style: const TextStyle(fontSize: 20),
+                  style: const TextStyle(fontSize: 17),
                 ),
               ],
             ),
@@ -188,7 +188,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 Text(
                   widget.phoneNumber,
-                  style: const TextStyle(fontSize: 20),
+                  style: const TextStyle(fontSize: 17),
                 ),
               ],
             ),
