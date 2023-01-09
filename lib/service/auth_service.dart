@@ -1,25 +1,49 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:groupify/helper/helper_function.dart';
 import 'package:groupify/service/database_service.dart';
 
 class AuthService {
   FirebaseAuth firebaseAuth = FirebaseAuth.instance;
   //Login Function
-
-  //Register Function
-  Future registerUserWithEmailAndPassword(
-      String fullName, String email, String password) async {
+  Future loginWithUserNameAndPassword(String email, String password) async {
     try {
-      User user = (await firebaseAuth.createUserWithEmailAndPassword(
+      User user = (await firebaseAuth.signInWithEmailAndPassword(
               email: email, password: password))
           .user!;
       if (user != null) {
-        await DatabaseService(uid: user.uid).updateUserData(fullName, email);
         return true;
       }
     } on FirebaseAuthException catch (e) {
       return e.message;
     }
   }
-  //SignOut Function
 
+  //Register Function
+  Future registerUserWithEmailAndPassword(String fullName, String email,
+      String password, String phoneNumber) async {
+    try {
+      User user = (await firebaseAuth.createUserWithEmailAndPassword(
+              email: email, password: password))
+          .user!;
+      if (user != null) {
+        await DatabaseService(uid: user.uid)
+            .savingUserData(fullName, email, phoneNumber);
+        return true;
+      }
+    } on FirebaseAuthException catch (e) {
+      return e.message;
+    }
+  }
+
+  //SignOut Function
+  Future signOut() async {
+    try {
+      await HelperFunctions.saveUserLoggedInStatus(false);
+      await HelperFunctions.saveUserNameSF("");
+      await HelperFunctions.saveUserEmailSF("");
+      await firebaseAuth.signOut();
+    } catch (e) {
+      return null;
+    }
+  }
 }

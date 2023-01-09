@@ -195,12 +195,14 @@ class _RegisterPageState extends State<RegisterPage> {
         _isLoading = true;
       });
       await authService
-          .registerUserWithEmailAndPassword(fullName, email, password)
+          .registerUserWithEmailAndPassword(
+              fullName, email, password, phoneNumber)
           .then((value) async {
         if (value == true) {
           await HelperFunctions.saveUserLoggedInStatus(true);
           await HelperFunctions.saveUserNameSF(fullName);
           await HelperFunctions.saveUserEmailSF(email);
+          await HelperFunctions.saveUserPhoneNumberSF(phoneNumber);
           nextScreenReplace(context, const HomePage());
         } else {
           showSnackbar(context, Colors.red, value);
