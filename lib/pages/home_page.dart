@@ -21,6 +21,8 @@ class _HomePageState extends State<HomePage> {
   String email = "";
   String phoneNumber = "";
   Stream? groups;
+  bool _isLoading = false;
+  String groupName = "";
   @override
   void initState() {
     super.initState();
@@ -187,29 +189,75 @@ class _HomePageState extends State<HomePage> {
   }
 
   popUpDialog(BuildContext context) {
-    return showDialog(
+    showDialog(
+        barrierDismissible: false,
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text("Create Group"),
-            content: const TextField(
-              decoration: InputDecoration(
-                hintText: "Enter Group Name",
-              ),
+            title: const Text(
+              "Create a Group",
+              textAlign: TextAlign.left,
             ),
+            content: Column(mainAxisSize: MainAxisSize.min, children: [
+              _isLoading == true
+                  ? Center(
+                      child: CircularProgressIndicator(
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    )
+                  : TextField(
+                      onChanged: (value) {
+                        setState(() {
+                          groupName = value;
+                        });
+                      },
+                      style: const TextStyle(color: Colors.black),
+                      decoration: InputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide:
+                              BorderSide(color: Theme.of(context).primaryColor),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: const BorderSide(color: Colors.red),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: const BorderSide(color: Colors.green),
+                        ),
+                      ),
+                    ),
+            ]),
             actions: [
-              TextButton(
+              ElevatedButton(
                 onPressed: () {
-                  Navigator.pop(context);
+                  Navigator.of(context).pop();
                 },
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.red,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
                 child: const Text("Cancel"),
               ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
+              ElevatedButton(
+                onPressed: () async {
+                  if (groupName != "") {
+                    setState(() {
+                      _isLoading = true;
+                    });
+                  }
                 },
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.green,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
                 child: const Text("Create"),
-              ),
+              )
             ],
           );
         });
@@ -220,7 +268,18 @@ class _HomePageState extends State<HomePage> {
       stream: groups,
       builder: (context, AsyncSnapshot snapshot) {
         if (snapshot.hasData) {
-          LoginPage();
+          //snapshot having the list of groups
+          if (snapshot.data['groups'] != null) {
+            //getting the list of groups
+            if (snapshot.data['groups'].length != 0) {
+              //if the list is not empty
+              return Text("Helllo");
+            } else {
+              return noGroupWidget();
+            }
+          } else {
+            return noGroupWidget();
+          }
         } else {
           return Center(
               child: CircularProgressIndicator(
@@ -228,6 +287,35 @@ class _HomePageState extends State<HomePage> {
           ));
         }
       },
+    );
+  }
+
+  noGroupWidget() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 25),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          GestureDetector(
+            onTap: () {
+              popUpDialog(context);
+            },
+            child: Icon(
+              Icons.add_circle_rounded,
+              size: 100,
+              color: Colors.grey[700],
+            ),
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          const Text(
+            "You have not joined any group, create a group or join a group by seraching from top to start chatting.",
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 }
