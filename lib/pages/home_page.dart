@@ -248,6 +248,7 @@ class _HomePageState extends State<HomePage> {
                     setState(() {
                       _isLoading = true;
                     });
+                    DatabaseService(uid: FirebaseAuth);
                   }
                 },
                 style: ElevatedButton.styleFrom(
