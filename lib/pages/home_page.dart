@@ -4,6 +4,7 @@ import 'package:groupify/pages/auth/login_page.dart';
 import 'package:groupify/pages/search_page.dart';
 import 'package:groupify/service/auth_service.dart';
 import 'package:groupify/service/database_service.dart';
+import 'package:groupify/widgets/group_tile.dart';
 import 'package:groupify/widgets/widgets.dart';
 
 import '../helper/helper_function.dart';
@@ -27,6 +28,15 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     gettingUserData();
+  }
+
+  //string manipulation
+  String getId(String res) {
+    return res.substring(0, res.indexOf("_"));
+  }
+
+  String getName(String res) {
+    return res.substring(res.indexOf("_") + 1);
   }
 
   gettingUserData() async {
@@ -67,7 +77,7 @@ class _HomePageState extends State<HomePage> {
                 },
                 icon: Icon(Icons.search))
           ],
-          elevation: 2,
+          elevation: 0,
           centerTitle: true,
           backgroundColor: Theme.of(context).primaryColor,
           title: const Text(
@@ -190,9 +200,10 @@ class _HomePageState extends State<HomePage> {
 
   popUpDialog(BuildContext context) {
     showDialog(
-        barrierDismissible: false,
-        context: context,
-        builder: (context) {
+      barrierDismissible: false,
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(builder: (context, setState) {
           return AlertDialog(
             title: const Text(
               "Create a Group",
@@ -248,7 +259,14 @@ class _HomePageState extends State<HomePage> {
                     setState(() {
                       _isLoading = true;
                     });
-                    DatabaseService(uid: FirebaseAuth);
+                    DatabaseService(uid: FirebaseAuth.instance.currentUser!.uid)
+                        .createGroup(userName,
+                            FirebaseAuth.instance.currentUser!.uid, groupName)
+                        .whenComplete(() {
+                      _isLoading = false;
+                    });
+                    Navigator.of(context).pop();
+                    showSnackbar(context, Colors.green, "Group Created");
                   }
                 },
                 style: ElevatedButton.styleFrom(
@@ -262,6 +280,8 @@ class _HomePageState extends State<HomePage> {
             ],
           );
         });
+      },
+    );
   }
 
   groupList() {
@@ -274,7 +294,17 @@ class _HomePageState extends State<HomePage> {
             //getting the list of groups
             if (snapshot.data['groups'].length != 0) {
               //if the list is not empty
-              return Text("Helllo");
+              return ListView.builder(
+                  itemCount: snapshot.data['groups'].length,
+                  itemBuilder: (context, index) {
+                    int reverseIndex =
+                        snapshot.data['groups'].length - index - 1;
+                    return GroupTile(
+                      groupId: getId(snapshot.data['groups'][reverseIndex]),
+                      groupName: getName(snapshot.data['groups'][index]),
+                      userName: snapshot.data['fullName'],
+                    );
+                  });
             } else {
               return noGroupWidget();
             }
