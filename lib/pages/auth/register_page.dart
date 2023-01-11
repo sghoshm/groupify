@@ -98,7 +98,6 @@ class _RegisterPageState extends State<RegisterPage> {
                             height: 2,
                           ),
                           TextFormField(
-                            obscureText: true,
                             decoration: textInputDecoration.copyWith(
                                 labelText: "Mobile",
                                 prefixIcon: Icon(
@@ -111,7 +110,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               });
                             },
                             validator: (val) {
-                              if (val!.length < 6) {
+                              if (val!.length < 10) {
                                 return "Invalid Phone Number";
                               } else {
                                 return null;
