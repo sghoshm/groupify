@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:groupify/pages/chat_page.dart';
+import 'package:groupify/pages/home_page.dart';
+import 'package:groupify/widgets/widgets.dart';
 
 import '../service/database_service.dart';
 
@@ -54,7 +56,48 @@ class _GroupInfoState extends State<GroupInfo> {
         elevation: 0,
         backgroundColor: Theme.of(context).primaryColor,
         actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.group_off))
+          IconButton(
+              onPressed: () {
+                showDialog(
+                  barrierDismissible: false,
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: const Text("Leave Group"),
+                      content: const Text("Are you sure you want to leave?"),
+                      actions: [
+                        IconButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          icon: const Icon(
+                            Icons.cancel_outlined,
+                            color: Colors.red,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () async {
+                            await DatabaseService(
+                                    uid: FirebaseAuth.instance.currentUser!.uid)
+                                .toggleGroupJoin(widget.groupName,
+                                    widget.groupId, getName(widget.adminName))
+                                .whenComplete(() {
+                              nextScreenReplace(context, const HomePage());
+                              showSnackbar(context, Colors.redAccent,
+                                  "Left the Group Successfully");
+                            });
+                          },
+                          icon: const Icon(
+                            Icons.done_all_outlined,
+                            color: Colors.green,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              icon: const Icon(Icons.group_off))
         ],
       ),
       body: Container(
@@ -140,7 +183,7 @@ class _GroupInfoState extends State<GroupInfo> {
                         ),
                       ),
                       title: Text(getName(snapshot.data['members'][index])),
-                      subtitle: Text(getId(snapshot.data['members'][index])),
+                      //subtitle: Text(getId(snapshot.data['members'][index])),
                     ),
                   );
                 },
