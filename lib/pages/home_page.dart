@@ -21,6 +21,7 @@ class _HomePageState extends State<HomePage> {
   String userName = "";
   String email = "";
   String phoneNumber = "";
+  String countryCode = "";
   Stream? groups;
   bool _isLoading = false;
   String groupName = "";
@@ -53,6 +54,11 @@ class _HomePageState extends State<HomePage> {
     await HelperFunctions.getPhoneNumberFromSF().then((value) {
       setState(() {
         phoneNumber = value!;
+      });
+    });
+    await HelperFunctions.getCountryCodeFromSF().then((value) {
+      setState(() {
+        countryCode = value!;
       });
     });
     //getting the list of snapshots of groups
@@ -130,6 +136,7 @@ class _HomePageState extends State<HomePage> {
                         userName: userName,
                         email: email,
                         phoneNumber: phoneNumber,
+                        countryCode: countryCode,
                       ));
                 },
                 contentPadding:

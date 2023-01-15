@@ -156,6 +156,8 @@ class _LoginPageState extends State<LoginPage> {
           await HelperFunctions.saveUserNameSF(snapshot.docs[0]["fullName"]);
           await HelperFunctions.saveUserPhoneNumberSF(
               snapshot.docs[0]["phoneNumber"]);
+          await HelperFunctions.saveUserCountryCodeSF(
+              snapshot.docs[0]["countryCode"]);
           await HelperFunctions.saveUserEmailSF(email);
           nextScreenReplace(context, const HomePage());
         } else {

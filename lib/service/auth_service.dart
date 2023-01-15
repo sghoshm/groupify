@@ -20,14 +20,14 @@ class AuthService {
 
   //Register Function
   Future registerUserWithEmailAndPassword(String fullName, String email,
-      String password, String phoneNumber) async {
+      String password, String phoneNumber, String countryCode) async {
     try {
       User user = (await firebaseAuth.createUserWithEmailAndPassword(
               email: email, password: password))
           .user!;
       if (user != null) {
         await DatabaseService(uid: user.uid)
-            .savingUserData(fullName, email, phoneNumber);
+            .savingUserData(fullName, email, phoneNumber, countryCode);
         return true;
       }
     } on FirebaseAuthException catch (e) {
@@ -41,6 +41,8 @@ class AuthService {
       await HelperFunctions.saveUserLoggedInStatus(false);
       await HelperFunctions.saveUserNameSF("");
       await HelperFunctions.saveUserEmailSF("");
+      await HelperFunctions.saveUserPhoneNumberSF("");
+      await HelperFunctions.saveUserCountryCodeSF("");
       await firebaseAuth.signOut();
     } catch (e) {
       return null;

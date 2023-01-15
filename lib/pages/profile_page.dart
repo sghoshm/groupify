@@ -9,11 +9,13 @@ class ProfilePage extends StatefulWidget {
   String userName;
   String email;
   String phoneNumber;
+  String countryCode;
   ProfilePage(
       {Key? key,
       required this.userName,
       required this.email,
-      required this.phoneNumber})
+      required this.phoneNumber,
+      required this.countryCode})
       : super(key: key);
 
   @override
@@ -182,14 +184,24 @@ class _ProfilePageState extends State<ProfilePage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text(
-                  "Phone Number: ",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  widget.phoneNumber,
-                  style: const TextStyle(fontSize: 17),
-                ),
+                Column(children: [
+                  const Text(
+                    "Phone Number: ",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  Row(
+                    children: [
+                      Text(
+                        widget.countryCode,
+                        style: const TextStyle(fontSize: 17),
+                      ),
+                      Text(
+                        widget.phoneNumber,
+                        style: const TextStyle(fontSize: 17),
+                      ),
+                    ],
+                  ),
+                ])
               ],
             ),
           ],

@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:groupify/helper/helper_function.dart';
 import 'package:groupify/pages/auth/login_page.dart';
+import 'package:groupify/pages/auth/otp_page.dart';
 
 import 'package:groupify/pages/auth/terms_of_use.dart';
 import 'package:groupify/pages/home_page.dart';
@@ -17,13 +18,21 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  TextEditingController countryController = TextEditingController();
   bool _isLoading = false;
   final formKey = GlobalKey<FormState>();
   String email = "";
   String password = "";
   String fullName = "";
   String phoneNumber = "";
+  String countryCode = "";
   AuthService authService = AuthService();
+  @override
+  void initState() {
+    countryController.text = "+91";
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -97,25 +106,74 @@ class _RegisterPageState extends State<RegisterPage> {
                           const SizedBox(
                             height: 2,
                           ),
-                          TextFormField(
-                            decoration: textInputDecoration.copyWith(
-                                labelText: "Mobile",
-                                prefixIcon: Icon(
-                                  Icons.phone_android_rounded,
-                                  color: Theme.of(context).primaryColor,
-                                )),
-                            onChanged: (val) {
-                              setState(() {
-                                phoneNumber = val;
-                              });
-                            },
-                            validator: (val) {
-                              if (val!.length < 10) {
-                                return "Invalid Phone Number";
-                              } else {
-                                return null;
-                              }
-                            },
+                          Container(
+                            height: 55,
+                            decoration: BoxDecoration(
+                                border: const Border.fromBorderSide(
+                                    BorderSide(color: Colors.grey)),
+                                borderRadius: BorderRadius.circular(02)),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SizedBox(
+                                  width: 80,
+                                  child: TextFormField(
+                                    controller: countryController,
+                                    keyboardType: TextInputType.number,
+                                    decoration: InputDecoration(
+                                      hintText: "+CC",
+                                      hintStyle: const TextStyle(
+                                          color: Colors.grey, fontSize: 18),
+                                      prefixIcon: Icon(
+                                        Icons.phone,
+                                        color: Theme.of(context).primaryColor,
+                                      ),
+                                      border: InputBorder.none,
+                                    ),
+                                    onChanged: (val) {
+                                      setState(() {
+                                        countryCode = val;
+                                      });
+                                    },
+                                    validator: (val) {
+                                      if (val!.length < 2) {
+                                        return "Invalid Country Code";
+                                      } else {
+                                        return null;
+                                      }
+                                    },
+                                  ),
+                                ),
+                                const Text(
+                                  "|",
+                                  style: TextStyle(
+                                      fontSize: 33, color: Colors.grey),
+                                ),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                Expanded(
+                                  child: TextFormField(
+                                    keyboardType: TextInputType.phone,
+                                    decoration: textInputDecoration.copyWith(
+                                      labelText: "Phone Number",
+                                    ),
+                                    onChanged: (val) {
+                                      setState(() {
+                                        phoneNumber = val;
+                                      });
+                                    },
+                                    validator: (val) {
+                                      if (val!.length < 10) {
+                                        return "Invalid Phone Number";
+                                      } else {
+                                        return null;
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                           const SizedBox(
                             height: 2,
@@ -155,6 +213,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                         borderRadius:
                                             BorderRadius.circular(30))),
                                 onPressed: (() {
+                                  //nextScreenReplace(context, const OtpPage());
                                   register();
                                 }),
                                 child: const Text(
@@ -195,13 +254,14 @@ class _RegisterPageState extends State<RegisterPage> {
       });
       await authService
           .registerUserWithEmailAndPassword(
-              fullName, email, password, phoneNumber)
+              fullName, email, password, phoneNumber, countryCode)
           .then((value) async {
         if (value == true) {
           await HelperFunctions.saveUserLoggedInStatus(true);
           await HelperFunctions.saveUserNameSF(fullName);
           await HelperFunctions.saveUserEmailSF(email);
           await HelperFunctions.saveUserPhoneNumberSF(phoneNumber);
+          await HelperFunctions.saveUserCountryCodeSF(countryCode);
           nextScreenReplace(context, const HomePage());
         } else {
           showSnackbar(context, Colors.red, value);
