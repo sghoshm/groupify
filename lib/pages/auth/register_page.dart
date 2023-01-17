@@ -1,8 +1,8 @@
+import 'package:country_picker/country_picker.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:groupify/helper/helper_function.dart';
 import 'package:groupify/pages/auth/login_page.dart';
-import 'package:groupify/pages/auth/otp_page.dart';
 
 import 'package:groupify/pages/auth/terms_of_use.dart';
 import 'package:groupify/pages/home_page.dart';
@@ -18,7 +18,7 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  TextEditingController countryController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
   bool _isLoading = false;
   final formKey = GlobalKey<FormState>();
   String email = "";
@@ -27,14 +27,27 @@ class _RegisterPageState extends State<RegisterPage> {
   String phoneNumber = "";
   String countryCode = "";
   AuthService authService = AuthService();
-  @override
-  void initState() {
-    countryController.text = "+91";
-    super.initState();
-  }
-
+  Country selectedCountry = Country(
+    phoneCode: '91',
+    countryCode: 'IN',
+    e164Sc: 0,
+    geographic: true,
+    level: 1,
+    name: 'India',
+    example: 'India',
+    displayName: 'India',
+    displayNameNoCountryCode: 'IN',
+    e164Key: '',
+  );
   @override
   Widget build(BuildContext context) {
+    phoneNumber = phoneController.text;
+    countryCode = selectedCountry.phoneCode;
+    phoneController.selection = TextSelection.fromPosition(
+      TextPosition(
+        offset: phoneController.text.length,
+      ),
+    );
     return Scaffold(
         body: _isLoading
             ? Center(
@@ -60,6 +73,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           const SizedBox(height: 10),
                           Image.asset("assets/register.png"),
                           const SizedBox(height: 10),
+//name
                           TextFormField(
                             decoration: textInputDecoration.copyWith(
                                 labelText: "Full Name",
@@ -83,6 +97,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           const SizedBox(
                             height: 2,
                           ),
+//email
                           TextFormField(
                             decoration: textInputDecoration.copyWith(
                                 labelText: "Email",
@@ -106,75 +121,60 @@ class _RegisterPageState extends State<RegisterPage> {
                           const SizedBox(
                             height: 2,
                           ),
-                          Container(
-                            height: 55,
-                            decoration: BoxDecoration(
-                                border: const Border.fromBorderSide(
-                                    BorderSide(color: Colors.grey)),
-                                borderRadius: BorderRadius.circular(02)),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                SizedBox(
-                                  width: 80,
-                                  child: TextFormField(
-                                    controller: countryController,
-                                    keyboardType: TextInputType.number,
-                                    decoration: InputDecoration(
-                                      hintText: "+CC",
-                                      hintStyle: const TextStyle(
-                                          color: Colors.grey, fontSize: 18),
-                                      prefixIcon: Icon(
-                                        Icons.phone,
-                                        color: Theme.of(context).primaryColor,
-                                      ),
-                                      border: InputBorder.none,
+//phone number
+                          TextFormField(
+                            cursorColor: Theme.of(context).primaryColor,
+                            controller: phoneController,
+                            keyboardType: TextInputType.phone,
+                            onChanged: (val) {
+                              setState(() {
+                                phoneController.text = val;
+                              });
+                            },
+                            decoration: textInputDecoration.copyWith(
+                                labelText: "Mobile Number",
+                                prefixIcon: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 11, horizontal: 10),
+                                  child: InkWell(
+                                    onTap: () {
+                                      showCountryPicker(
+                                          context: context,
+                                          showPhoneCode: true,
+                                          countryListTheme:
+                                              const CountryListThemeData(
+                                                  bottomSheetHeight: 700),
+                                          onSelect: (value) {
+                                            setState(() {
+                                              selectedCountry = value;
+                                            });
+                                          });
+                                    },
+                                    child: Text(
+                                      "${selectedCountry.flagEmoji} +${selectedCountry.phoneCode}",
+                                      style: const TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.bold),
                                     ),
-                                    onChanged: (val) {
-                                      setState(() {
-                                        countryCode = val;
-                                      });
-                                    },
-                                    validator: (val) {
-                                      if (val!.length < 2) {
-                                        return "Invalid Country Code";
-                                      } else {
-                                        return null;
-                                      }
-                                    },
                                   ),
                                 ),
-                                const Text(
-                                  "|",
-                                  style: TextStyle(
-                                      fontSize: 33, color: Colors.grey),
-                                ),
-                                const SizedBox(
-                                  width: 10,
-                                ),
-                                Expanded(
-                                  child: TextFormField(
-                                    keyboardType: TextInputType.phone,
-                                    decoration: textInputDecoration.copyWith(
-                                      labelText: "Phone Number",
-                                    ),
-                                    onChanged: (val) {
-                                      setState(() {
-                                        phoneNumber = val;
-                                      });
-                                    },
-                                    validator: (val) {
-                                      if (val!.length < 10) {
-                                        return "Invalid Phone Number";
-                                      } else {
-                                        return null;
-                                      }
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
+                                suffixIcon: phoneController.text.length > 9
+                                    ? Container(
+                                        height: 30,
+                                        width: 30,
+                                        margin: const EdgeInsets.all(10),
+                                        decoration: const BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: Colors.green),
+                                        child: const Icon(
+                                          Icons.check,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                      )
+                                    : null),
                           ),
+// password
                           const SizedBox(
                             height: 2,
                           ),
@@ -213,8 +213,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                         borderRadius:
                                             BorderRadius.circular(30))),
                                 onPressed: (() {
-                                  //nextScreenReplace(context, const OtpPage());
                                   register();
+                                  //sendPhoneNumber();
+                                  //print("+$countryCode$phoneNumber");
                                 }),
                                 child: const Text(
                                   "Register",
@@ -246,6 +247,11 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ));
   }
+
+  /*void sendPhoneNumber() {
+    final ap = Provider.of<AuthProvider>(context);
+    ap.signInWithPhone(context, "+$countryCode$phoneNumber");
+  }*/
 
   register() async {
     if (formKey.currentState!.validate()) {

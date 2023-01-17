@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 const textInputDecoration = InputDecoration(
-    labelStyle: TextStyle(color: Colors.black, fontWeight: FontWeight.w300),
+    labelStyle: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
     focusedBorder: OutlineInputBorder(
         borderSide: BorderSide(color: Colors.green, width: 2)),
     enabledBorder: OutlineInputBorder(

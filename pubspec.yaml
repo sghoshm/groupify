@@ -29,14 +29,18 @@ environment:
 dependencies:
   animations: ^2.0.7
   cloud_firestore: ^4.3.0
+  country_picker: ^2.0.19
   cupertino_icons: ^1.0.2
   firebase_auth: ^4.2.3
   firebase_core: ^2.4.0
+  firebase_phone_auth_handler: ^1.0.7
   flutter:
     sdk: flutter
   flutter_markdown: ^0.6.13
   fluttertoast: ^8.1.2
+  provider: ^6.0.5
   shared_preferences: ^2.0.15
+  
 
 dev_dependencies:
   flutter_lints: ^2.0.0

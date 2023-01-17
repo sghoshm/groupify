@@ -192,11 +192,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   Row(
                     children: [
                       Text(
-                        widget.countryCode,
-                        style: const TextStyle(fontSize: 17),
-                      ),
-                      Text(
-                        widget.phoneNumber,
+                        "+${widget.countryCode}${widget.phoneNumber}",
                         style: const TextStyle(fontSize: 17),
                       ),
                     ],
