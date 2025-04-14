@@ -1,0 +1,36 @@
+version: '3.8'
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
+      - APPWRITE_PROJECT_ID=YOUR_APPWRITE_PROJECT_ID  # Replace with your actual project ID
+      - APPWRITE_API_KEY=YOUR_APPWRITE_API_KEY      # Replace with your actual API key
+      # Add other environment variables as needed
+    depends_on:
+      - ollama
+    volumes:
+      - backend_data:/app
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    # You might need to adjust volumes depending on how you build your Flutter web app
+    # volumes:
+    #   - ./frontend/build/web:/usr/share/nginx/html:ro
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+
+volumes:
+  ollama_data:
+  backend_data:
