@@ -1,16 +1,16 @@
-from appwrite.client import Client
-from appwrite.databases import Databases
+from appwrite.services.databases import Databases
 from app.core.config import settings
 from app.schemas.chat import ChatCreate, ChatUpdate, ChatResponse
 from app.models.chat import Chat
-from app.utils.appwrite_client import database
+from app.utils.appwrite_client import client
 
-APPWRITE_DATABASE_ID = "your-database-id"  # Replace with your Appwrite database ID
-CHAT_COLLECTION_ID = "chat-collection-id"  # Replace with your Appwrite chat collection ID
+APPWRITE_DATABASE_ID = settings.APPWRITE_DATABASE_ID
+CHAT_COLLECTION_ID = settings.CHATS_COLLECTION_ID
 
 async def create(chat: ChatCreate) -> ChatResponse:
     chat_dict = chat.model_dump()
-    result = await database.create_document(
+    databases = Databases(client)
+    result = await databases.create_document(
         settings.APPWRITE_PROJECT_ID,
         APPWRITE_DATABASE_ID,
         CHAT_COLLECTION_ID,
@@ -19,7 +19,8 @@ async def create(chat: ChatCreate) -> ChatResponse:
     return ChatResponse(**result.data, id=result.id)
 
 async def get_by_group_id(group_id: str) -> ChatResponse | None:
-    documents = await database.list_documents(
+    databases = Databases(client)
+    documents = await databases.list_documents(
         settings.APPWRITE_PROJECT_ID,
         APPWRITE_DATABASE_ID,
         CHAT_COLLECTION_ID,
@@ -35,7 +36,8 @@ async def update(group_id: str, chat: ChatUpdate) -> ChatResponse | None:
         return None
 
     update_data = chat.model_dump(exclude_unset=True)
-    result = await database.update_document(
+    databases = Databases(client)
+    result = await databases.update_document(
         settings.APPWRITE_PROJECT_ID,
         APPWRITE_DATABASE_ID,
         CHAT_COLLECTION_ID,
@@ -43,5 +45,3 @@ async def update(group_id: str, chat: ChatUpdate) -> ChatResponse | None:
         update_data,
     )
     return ChatResponse(**result.data, id=result.id)
-
-# Add more CRUD operations as needed (e.g., delete chat)

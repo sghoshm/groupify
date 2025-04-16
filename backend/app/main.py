@@ -4,13 +4,7 @@ from app.api.v1 import api_router
 
 app = FastAPI(title="Groupify Backend")
 
-# Configure CORS
-origins = [
-    "http://localhost:3000",  # Default Flutter web port
-    "http://localhost",
-    "https://your-cloudflare-tunnel-url.com",  # Replace with your Cloudflare Tunnel URL for frontend
-    "*",  # Be cautious with this in production
-]
+origins = ["*"]  # Adjust as needed for security
 
 app.add_middleware(
     CORSMiddleware,

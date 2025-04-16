@@ -23,5 +23,3 @@ async def update_chat(group_id: str, chat_in: ChatUpdate):
     if not chat:
         raise HTTPException(status_code=404, detail="Chat not found")
     return chat
-
-# Add more chat-related endpoints as needed (e.g., for adding new messages)

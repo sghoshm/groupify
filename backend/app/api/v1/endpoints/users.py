@@ -30,5 +30,3 @@ async def get_user_profile(user_id: str):
     if not profile:
         raise HTTPException(status_code=404, detail="User profile not found")
     return profile
-
-# You might want to add endpoints for listing users, etc.
