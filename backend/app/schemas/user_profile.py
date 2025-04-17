@@ -9,7 +9,7 @@ class UserProfileBase(BaseModel):
     profile_picture_url: Optional[str] = None
 
 class UserProfileCreate(UserProfileBase):
-    pass  # user_id will be generated on the backend
+    user_id: Optional[str] = None  # Let backend set it
 
 class UserProfileUpdate(UserProfileBase):
     username: Optional[str] = None

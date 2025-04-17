@@ -3,9 +3,9 @@ from typing import Optional
 class UserProfile:
     def __init__(
         self,
-        user_id: str,  # Appwrite user ID
         username: str,
         email: str,
+        user_id: Optional[str] = None,  # Appwrite user ID - Made Optional
         full_name: Optional[str] = None,
         bio: Optional[str] = None,
         profile_picture_url: Optional[str] = None,
