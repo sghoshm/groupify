@@ -56,4 +56,4 @@ async def login_user(user: UserProfileCreate):  # Using UserProfileCreate for si
     except AppwriteException as e:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-# Add more authentication endpoints like logout, get current user, etc.
+# Add more authenticatioon endpoints like logout, get current user, etc.
