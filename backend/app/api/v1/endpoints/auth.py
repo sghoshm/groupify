@@ -41,7 +41,7 @@ def register_user(user: UserProfileCreate):
 @router.post("/login", response_model=UserProfileResponse)
 async def login_user(user: UserProfileCreate):  # Using UserProfileCreate for simplicity, you might want a dedicated Login schema
     try:
-        session = await account.create_session(user.email, "password")
+        session = await account.create_session(user.email, "super-secure-pwd")
         user_data = await account.get()
         profile_document = await database.list_documents(
             settings.APPWRITE_PROJECT_ID,
