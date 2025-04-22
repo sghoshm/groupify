@@ -9,7 +9,12 @@ class UserProfileBase(BaseModel):
     profile_picture_url: Optional[str] = None
 
 class UserProfileCreate(UserProfileBase):
+    password: str  # 🔒 Required for registration
     user_id: Optional[str] = None  # Let backend set it
+
+class UserLoginSchema(BaseModel):  # ✅ This was missing!
+    email: EmailStr
+    password: str
 
 class UserProfileUpdate(UserProfileBase):
     username: Optional[str] = None

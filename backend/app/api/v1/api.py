@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import auth, chat, users
+from app.api.v1.endpoints import auth, chat, users  # 💡 check all three exist
 
 api_router = APIRouter()
 
