@@ -1,7 +1,0 @@
-appwrite
-fastapi
-uvicorn
-python-multipart
-requests
-pydantic[email]
-alembic
