@@ -1,0 +1,23 @@
+# frontend/analysis_options.yaml
+include: package:flutter_lints/flutter.yaml
+
+# Additional information about this file can be found at:
+# https://dart.dev/guides/language/analysis-options
+
+analyzer:
+  exclude:
+    # Exclude generated files from analysis
+    - '**/*.g.dart'
+    - '**/*.freezed.dart'
+
+linter:
+  # The lint rules applied to this project can be customized from the
+  # set of recommended lints in package:flutter_lints/flutter.yaml.
+  # See https://dart.dev/guides/language/effective-dart/style#lints
+  rules:
+    # Enable recommended lints from flutter_lints
+    - avoid_print # Avoid using print statements in production code
+    - prefer_single_quotes # Prefer single quotes for strings
+    # Add or remove other rules as needed
+    # - avoid_unused_local_variables
+    # - prefer_const_constructors

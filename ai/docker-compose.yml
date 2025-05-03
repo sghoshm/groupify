@@ -1,0 +1,15 @@
+# ai/docker-compose.yml
+version: '3.8' # Specify Docker Compose file format version
+
+services:
+  ollama:
+    image: ollama/ollama # Use the official Ollama Docker image
+    ports:
+      - "11434:11434" # Map host port 11434 to container port 11434
+    volumes:
+      # Persist Ollama data (models, etc.) to a named volume
+      - ollama-data:/root/.ollama
+
+volumes:
+  # Define the named volume for Ollama data persistence
+  ollama-data:

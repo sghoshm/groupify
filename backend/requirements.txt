@@ -1,0 +1,17 @@
+# backend/requirements.txt
+# FastAPI framework
+fastapi
+# ASGI server
+uvicorn
+# Supabase Python client
+supabase
+# Library for making HTTP requests (used by supabase-py and potentially your code)
+requests
+# Data validation and serialization library
+pydantic
+# Library for loading environment variables from a .env file
+python-dotenv
+# Testing framework
+pytest
+# Asynchronous HTTP client for testing
+httpx

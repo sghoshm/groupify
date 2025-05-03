@@ -1,0 +1,25 @@
+# backend/docker-compose.yml
+version: '3.8' # Specify Docker Compose file format version
+
+services:
+  backend:
+    build: . # Build the Docker image using the Dockerfile in the current directory (backend/)
+    ports:
+      - "8000:8000" # Map host port 8000 to container port 8000
+    environment:
+      # Pass environment variables from the host's .env file to the container
+      # These match the variables used in backend/app/core/config.py
+      - SUPABASE_URL=${'{'}SUPABASE_URL{'}'}
+      - SUPABASE_KEY=${'{'}SUPABASE_KEY{'}'}
+      - OLLAMA_ENDPOINT=http://ollama:11434 # Reference the Ollama service by its name in the Docker network
+    depends_on:
+      # Specify that the backend service depends on the ollama service
+      # This ensures ollama starts before the backend
+      - ollama
+    # Optional: Add volumes for persistent storage if your backend needs it
+    # volumes:
+    #   - backend-data:/app/data
+
+# Optional: Define volumes if you added any
+# volumes:
+#   backend-data:

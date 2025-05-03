@@ -1,0 +1,68 @@
+# .github/workflows/ci.yml
+name: CI
+
+on:
+  push:
+    branches:
+      - main # Or your main branch name
+    paths:
+      - 'backend/**' # Trigger on changes in backend directory
+      - 'ai/**'      # Trigger on changes in ai directory
+      - '.github/workflows/ci.yml' # Trigger on changes to the workflow file itself
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest # Use a standard Ubuntu runner
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3 # Checkout the repository code
+
+      - name: Set up Docker Buildx (Optional, for multi-platform builds)
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Docker Hub (Optional, if pushing images)
+        uses: docker/login-action@v2
+        with:
+          username: ${{'{'} secrets.DOCKER_USERNAME {'}'}} # Define DOCKER_USERNAME secret
+          password: ${{'{'} secrets.DOCKER_PASSWORD {'}'}} # Define DOCKER_PASSWORD secret
+
+      - name: Build and Push Backend Docker image (Optional, if using a registry)
+        # Replace your-dockerhub-username with your actual Docker Hub username
+        # This step is optional if you're only building on the VM
+        # uses: docker/build-push-action@v4
+        # with:
+        #   context: ./backend
+        #   push: true
+        #   tags: your-dockerhub-username/groupify-backend:latest
+
+      - name: SSH and Deploy to Oracle Cloud VM
+        uses: appleboy/ssh-action@v0.1.5 # Use the SSH action
+        with:
+          host: ${{'{'} secrets.VM_HOST {'}'}} # VM hostname or IP (GitHub Secret)
+          username: ${{'{'} secrets.VM_USER {'}'}} # VM username (GitHub Secret)
+          key: ${{'{'} secrets.VM_SSH_KEY {'}'}} # VM private SSH key (GitHub Secret)
+          script: |
+            # Navigate to the project directory on the VM
+            cd ~/groupify # Assuming your project is cloned here
+
+            # Ensure .env file exists on the VM (you might need a separate step to copy it securely)
+            # For simplicity in boilerplate, assuming .env is manually present or handled
+
+            # Pull latest code (if not using Docker registry)
+            # git pull origin main # Uncomment if pulling code directly on VM
+
+            # Build and restart Docker containers using docker-compose
+            # -f specifies the compose files
+            # up -d runs containers in detached mode
+            # --build rebuilds images
+            # --force-recreate recreates containers even if config hasn't changed
+            docker-compose -f backend/docker-compose.yml -f ai/docker-compose.yml up -d --build --force-recreate
+
+            # Optional: Prune old Docker images
+            # docker system prune -f
+
+            echo "Deployment script finished."
+
+      # Add steps for frontend deployment if needed (e.g., to Cloudflare Pages)
+      # This would likely be a separate job or workflow
