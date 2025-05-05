@@ -1,17 +1,21 @@
 # backend/app/utils/supabase_client.py
 from supabase import create_client, Client
-from backend.app.core.config import settings # Import settings from core config using absolute path
+from backend.app.core.config import settings
 
 def get_supabase_client() -> Client:
     """
-    Provides a Supabase client instance using configured settings.
-    This function can be used as a FastAPI dependency.
+    Returns a Supabase client using the anon public key.
+    Suitable for user-side operations like login/signup.
     """
     url: str = settings.SUPABASE_URL
-    key: str = settings.SUPABASE_KEY # This should be the anon key
-    # Consider adding error handling for invalid URL/Key
+    key: str = settings.SUPABASE_KEY  # anon key
     return create_client(url, key)
 
-# Consider adding functions for common Supabase interactions if not handled by services
-# def get_user_by_id(client: Client, user_id: str):
-#     return client.from_("profiles").select("*").eq("id", user_id).execute()
+def get_admin_supabase_client() -> Client:
+    """
+    Returns a Supabase client using the service role key.
+    Required for admin actions like resetting passwords.
+    """
+    url: str = settings.SUPABASE_URL
+    key: str = settings.SUPABASE_SERVICE_ROLE_KEY  # service role key
+    return create_client(url, key)

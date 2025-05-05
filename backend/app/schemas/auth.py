@@ -1,17 +1,29 @@
-# backend/app/schemas/auth.py
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 class UserCreate(BaseModel):
-    """Schema for user signup request."""
     email: str
     password: str
 
 class UserLogin(BaseModel):
-    """Schema for user login request."""
     email: str
     password: str
 
 class Token(BaseModel):
-    """Schema for JWT token response."""
+    """Schema for JWT token response (both access + refresh)."""
     access_token: str
-    token_type: str = "bearer" # Default token type
+    refresh_token: str
+    token_type: str = "bearer"
+
+class RefreshTokenRequest(BaseModel):
+    """Schema for refresh-token request body."""
+    refresh_token: str
+
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password: str
+
+class ResetPasswordRequest(BaseModel):
+    email: EmailStr
+
+class ConfirmResetRequest(BaseModel):
+    new_password: str

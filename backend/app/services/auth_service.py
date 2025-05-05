@@ -1,6 +1,8 @@
 from supabase import Client
 from postgrest.base_request_builder import APIResponse  # Import for type hinting Supabase responses
-from fastapi import HTTPException  # We also need to import HTTPException
+from fastapi import HTTPException ,status  # We also need to import HTTPException
+from backend.app.utils.supabase_client import get_admin_supabase_client
+import os
 
 class AuthService:
     """Service class for handling authentication logic with Supabase."""
@@ -28,23 +30,69 @@ class AuthService:
         })
         return response
 
+    # AuthService: Corrected get_current_user method
     def get_current_user(self, token: str):
         """
         Verifies JWT using Supabase and fetches the user.
         """
         try:
             if not token.startswith("Bearer "):
-                raise HTTPException(status_code=401, detail="Token must start with 'Bearer '")
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token must start with 'Bearer '")
 
-            jwt_token = token.split(" ")[1]
-            user = self.supabase_client.auth.get_user(jwt_token)
-            return user
+            jwt_token = token.split(" ", 1)[1]
+            resp = self.supabase_client.auth.get_user(jwt_token)
+            
+            # Check if the user object exists in the response
+            if not resp.user:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+            
+            return resp.user
+        except HTTPException:
+            raise
         except Exception as e:
-            raise HTTPException(status_code=401, detail=f"Invalid or expired token: {str(e)}")
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Invalid or expired token: {e}")
+
+
+    def refresh_session(self, refresh_token: str) -> APIResponse:
+        """
+        Refresh the user's session by using the provided refresh token.
+        Returns the Supabase APIResponse object containing the refreshed session.
+        """
+        response = self.supabase_client.auth.refresh_session(refresh_token)
+        return response
+
 
     # Add other auth-related methods as needed (e.g., logout, reset password, verify email)
-    # def logout(self, access_token: str) -> APIResponse:
-    #     return self.supabase_client.auth.sign_out(access_token)
+    def logout(self) -> APIResponse:
+        """
+        Server-side sign out: invalidates the current session.
+        Supabase Python SDK’s sign_out takes no arguments.
+        """
+        try:
+            resp = self.supabase_client.auth.sign_out()
+            print(f"Supabase Logout Response: {resp}")  # Log the response for debugging
+            return resp
+        except Exception as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Logout failed: {e}")
 
-    # def reset_password_for_email(self, email: str) -> APIResponse:
-    #     return self.supabase_client.auth.reset_password_for_email(email)
+    def reset_password_for_email(self, email: str) -> APIResponse:
+        return self.supabase_client.auth.reset_password_for_email(email)
+
+    # Add at the bottom of AuthService
+    # AuthService: Corrected admin_reset_password method
+    def admin_reset_password(self, user_id: str, new_password: str) -> APIResponse:
+        """
+        Admin method to reset a user's password using their user_id.
+        Requires Supabase service role key.
+        """
+        try:
+            response = self.supabase_client.auth.admin.update_user_by_id(
+                user_id,
+                {"password": new_password}
+            )
+            return response
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Failed to reset password: {str(e)}"
+            )
