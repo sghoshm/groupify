@@ -6,9 +6,10 @@ import os
 import traceback
 from backend.app.services.auth_service import AuthService
 from backend.app.utils.supabase_client import get_supabase_client, get_admin_supabase_client    # fixed import
-from backend.app.schemas.auth import UserCreate, UserLogin, Token, RefreshTokenRequest, PasswordChange, ResetPasswordRequest, ConfirmResetRequest
+from backend.app.schemas.auth import UserCreate, UserLogin, Token, RefreshTokenRequest, PasswordChange, ResetPasswordRequest, ConfirmResetRequest, GoogleAuthRequest, GitHubAuthURLResponse
 
 router = APIRouter()
+
 
 @router.post("/signup", summary="Register a new user")
 def signup_user(user: UserCreate, client: Client = Depends(get_supabase_client)):
@@ -172,4 +173,19 @@ def confirm_reset_password(
 
     return {"message": "Password successfully updated"}
 
+@router.post("/login/google")
+def google_login_redirect():
+    response = AuthService.login_with_google_redirect_url()
+    return response
 
+@router.post("/auth/login/github", response_model=GitHubAuthURLResponse)
+def github_login():
+    return AuthService.login_with_github_redirect_url()
+
+@router.post("/login/phone/send")
+def send_otp(phone: dict):
+    return AuthService.login_with_phone_number(phone["phone_number"])
+
+@router.post("/login/phone/verify")
+def verify_otp(data: dict):
+    return AuthService.verify_phone_otp(data["phone_number"], data["token"])

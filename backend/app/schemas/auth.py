@@ -27,3 +27,17 @@ class ResetPasswordRequest(BaseModel):
 
 class ConfirmResetRequest(BaseModel):
     new_password: str
+
+class GoogleAuthRequest(BaseModel):
+    access_token: str
+
+class PhoneNumberRequest(BaseModel):
+    phone_number: str
+
+class VerifyOTPRequest(BaseModel):
+    phone_number: str
+    token: str
+
+class GitHubAuthURLResponse(BaseModel):
+    auth_url: str
+

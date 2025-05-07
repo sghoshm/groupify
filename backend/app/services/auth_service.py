@@ -96,3 +96,65 @@ class AuthService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Failed to reset password: {str(e)}"
             )
+    @staticmethod
+    def login_with_google_redirect_url() -> dict:
+        client = get_admin_supabase_client()
+        try:
+            # This generates the Google login redirect URL
+            response = client.auth.sign_in_with_oauth({
+                "provider": "google"
+            })
+
+            print(f"Redirect URL for Google login: {response.url}")
+
+            return {
+                "auth_url": response.url
+            }
+
+        except Exception as e:
+            print(f"Error generating Google OAuth URL: {str(e)}")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to generate Google login URL")
+
+
+    @staticmethod
+    def login_with_github_redirect_url() -> dict:
+        client = get_admin_supabase_client()
+        try:
+            response = client.auth.sign_in_with_oauth({
+                "provider": "github",
+                "options": {
+                    "redirect_to": "https://your-frontend.com/oauth/callback"
+                }
+            })
+            return {"auth_url": response.url}
+        except Exception as e:
+            print(f"GitHub login failed: {str(e)}")
+            raise HTTPException(status_code=400, detail="Failed to generate GitHub login URL")
+
+
+    @staticmethod
+    def login_with_phone_number(phone_number: str):
+        client = get_admin_supabase_client()
+        try:
+            response = client.auth.sign_in_with_otp(phone=phone_number)
+            return {"message": "OTP sent successfully"}
+        except Exception as e:
+            print(f"Phone OTP send failed: {str(e)}")
+            raise HTTPException(status_code=400, detail="Failed to send OTP")
+
+    @staticmethod
+    def verify_phone_otp(phone_number: str, token: str):
+        client = get_admin_supabase_client()
+        try:
+            response = client.auth.verify_otp(
+                phone=phone_number,
+                token=token,
+                type='sms'
+            )
+            return {
+                "session": response.session,
+                "user": response.user
+            }
+        except Exception as e:
+            print(f"OTP verification failed: {str(e)}")
+            raise HTTPException(status_code=400, detail="Invalid OTP")
