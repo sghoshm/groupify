@@ -1,146 +1,166 @@
 from supabase import Client
-from postgrest.base_request_builder import APIResponse  # Import for type hinting Supabase responses
-from fastapi import HTTPException ,status  # We also need to import HTTPException
+from postgrest.base_request_builder import APIResponse
+from fastapi import HTTPException, status
 from backend.app.utils.supabase_client import get_admin_supabase_client
 import os
 
 class AuthService:
-    """Service class for handling authentication logic with Supabase."""
     def __init__(self, supabase_client: Client):
         self.supabase_client = supabase_client
 
     def signup(self, email: str, password: str) -> APIResponse:
-        """
-        Calls Supabase Auth to sign up a new user.
-        Returns the Supabase APIResponse object.
-        """
-        # Corrected call to sign_up: Pass email and password within a dictionary
-        response = self.supabase_client.auth.sign_up({"email": email, "password": password})
-        return response
+        return self.supabase_client.auth.sign_up({"email": email, "password": password})
 
     def login(self, email: str, password: str) -> APIResponse:
-        """
-        Calls Supabase Auth to log in an existing user.
-        Returns the Supabase APIResponse object containing user and session.
-        """
-        # Corrected call: pass email and password inside a dictionary
-        response = self.supabase_client.auth.sign_in_with_password({
+        return self.supabase_client.auth.sign_in_with_password({
             "email": email,
             "password": password
         })
-        return response
 
-    # AuthService: Corrected get_current_user method
     def get_current_user(self, token: str):
-        """
-        Verifies JWT using Supabase and fetches the user.
-        """
         try:
             if not token.startswith("Bearer "):
-                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token must start with 'Bearer '")
+                raise HTTPException(status_code=401, detail="Token must start with 'Bearer '")
 
-            jwt_token = token.split(" ", 1)[1]
-            resp = self.supabase_client.auth.get_user(jwt_token)
-            
-            # Check if the user object exists in the response
+            access_token = token.split(" ", 1)[1]
+
+            # Check if token is blacklisted
+            blacklist_check = self.supabase_client.table("token_blacklist").select("*").eq("token", access_token).execute()
+
+            if blacklist_check.data and len(blacklist_check.data) > 0:
+                raise HTTPException(status_code=401, detail="Token is blacklisted")
+
+            resp = self.supabase_client.auth.get_user(access_token)
+
             if not resp.user:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-            
+                raise HTTPException(status_code=404, detail="User not found")
+
             return resp.user
+
         except HTTPException:
             raise
         except Exception as e:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Invalid or expired token: {e}")
+            raise HTTPException(status_code=401, detail=f"Invalid or expired token: {e}")
 
 
     def refresh_session(self, refresh_token: str) -> APIResponse:
-        """
-        Refresh the user's session by using the provided refresh token.
-        Returns the Supabase APIResponse object containing the refreshed session.
-        """
-        response = self.supabase_client.auth.refresh_session(refresh_token)
-        return response
+        return self.supabase_client.auth.refresh_session(refresh_token)
 
-
-    # Add other auth-related methods as needed (e.g., logout, reset password, verify email)
-    def logout(self) -> APIResponse:
+    def logout(self, access_token: str) -> APIResponse:
         """
-        Server-side sign out: invalidates the current session.
-        Supabase Python SDK’s sign_out takes no arguments.
+        Logs out the user and blacklists the token to prevent reuse.
         """
         try:
-            resp = self.supabase_client.auth.sign_out()
-            print(f"Supabase Logout Response: {resp}")  # Log the response for debugging
-            return resp
+            if not access_token:
+                raise ValueError("Access token is required for logout.")
+
+            # Get current user info
+            user_response = self.supabase_client.auth.get_user(access_token)
+            if not user_response or not user_response.user:
+                raise HTTPException(status_code=401, detail="Invalid token.")
+
+            user_id = user_response.user.id
+
+            # Store token in blacklist table
+            insert_response = self.supabase_client.table("token_blacklist").insert({
+                "token": access_token,
+                "user_id": user_id
+            }).execute()
+
+            print(f"Token blacklisted for user {user_id}")
+
+            # Optional: log out from Supabase session as well
+            self.supabase_client.auth.sign_out()
+
+            return insert_response
+
         except Exception as e:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Logout failed: {e}")
+            print(f"Logout failed: {str(e)}")
+            raise HTTPException(status_code=400, detail=f"Logout failed: {e}")
 
-    def reset_password_for_email(self, email: str) -> APIResponse:
-        return self.supabase_client.auth.reset_password_for_email(email)
 
-    # Add at the bottom of AuthService
-    # AuthService: Corrected admin_reset_password method
-    def admin_reset_password(self, user_id: str, new_password: str) -> APIResponse:
-        """
-        Admin method to reset a user's password using their user_id.
-        Requires Supabase service role key.
-        """
+    def reset_password_for_email(self, email: str) -> dict:
         try:
-            response = self.supabase_client.auth.admin.update_user_by_id(
-                user_id,
-                {"password": new_password}
+            self.supabase_client.auth.reset_password_for_email(
+                email,
+                options={"redirect_to": os.getenv("RESET_PASSWORD_REDIRECT_URL", "http://localhost:3000/reset-password")}
             )
-            return response
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Failed to reset password: {str(e)}"
-            )
-    @staticmethod
-    def login_with_google_redirect_url() -> dict:
-        client = get_admin_supabase_client()
-        try:
-            # This generates the Google login redirect URL
-            response = client.auth.sign_in_with_oauth({
-                "provider": "google"
-            })
 
-            print(f"Redirect URL for Google login: {response.url}")
-
+            # Even if no response is returned, assume success if no exception is raised
             return {
-                "auth_url": response.url
+                "message": "Password reset link sent successfully.",
+                "email": email
             }
 
         except Exception as e:
-            print(f"Error generating Google OAuth URL: {str(e)}")
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to generate Google login URL")
+            print(f"Password reset error: {e}")
+            raise HTTPException(status_code=400, detail=f"Reset failed: {e}")
 
 
-    @staticmethod
-    def login_with_github_redirect_url() -> dict:
-        client = get_admin_supabase_client()
+
+    def admin_reset_password(self, user_id: str, new_password: str) -> APIResponse:
         try:
-            response = client.auth.sign_in_with_oauth({
-                "provider": "github",
-                "options": {
-                    "redirect_to": "https://your-frontend.com/oauth/callback"
-                }
-            })
-            return {"auth_url": response.url}
+            return self.supabase_client.auth.admin.update_user_by_id(
+                user_id,
+                {"password": new_password}
+            )
         except Exception as e:
-            print(f"GitHub login failed: {str(e)}")
-            raise HTTPException(status_code=400, detail="Failed to generate GitHub login URL")
-
+            raise HTTPException(status_code=400, detail=f"Failed to reset password: {str(e)}")
 
     @staticmethod
+    def get_oauth_url(provider: str, redirect_to: str = None) -> dict:
+        """
+        Generates a Supabase OAuth redirect URL for supported providers.
+        """
+        client = get_admin_supabase_client()
+
+        # Supported providers
+        valid_providers = {"google", "github", "facebook", "azure"}
+
+        if provider not in valid_providers:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Unsupported OAuth provider: '{provider}'. Supported providers: {', '.join(valid_providers)}"
+            )
+
+        try:
+            # Fallback redirect if not provided
+            redirect_to = redirect_to or os.getenv("OAUTH_REDIRECT_URL", "http://localhost:3000/oauth/callback")
+
+            # Construct payload for Supabase
+            payload = {
+                "provider": provider,
+                "options": {
+                    "redirect_to": redirect_to
+                }
+            }
+
+            # Request Supabase to generate URL
+            response = client.auth.sign_in_with_oauth(payload)
+
+            if not hasattr(response, "url") or not response.url:
+                raise HTTPException(
+                    status_code=status.HTTP_502_BAD_GATEWAY,
+                    detail="Failed to retrieve OAuth redirect URL from Supabase."
+                )
+
+            return {"auth_url": response.url}
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"OAuth URL generation failed for '{provider}': {str(e)}"
+            )
+'''    @staticmethod
     def login_with_phone_number(phone_number: str):
         client = get_admin_supabase_client()
         try:
-            response = client.auth.sign_in_with_otp(phone=phone_number)
-            return {"message": "OTP sent successfully"}
+            # Wrap phone inside a dict as per Supabase SDK
+            client.auth.sign_in_with_otp({"phone": phone_number})
+            return {"message": "OTP sent"}
         except Exception as e:
-            print(f"Phone OTP send failed: {str(e)}")
-            raise HTTPException(status_code=400, detail="Failed to send OTP")
+            raise HTTPException(status_code=400, detail=f"Failed to send OTP: {e}")
+
 
     @staticmethod
     def verify_phone_otp(phone_number: str, token: str):
@@ -151,10 +171,23 @@ class AuthService:
                 token=token,
                 type='sms'
             )
+
+            if not response.session:
+                raise HTTPException(status_code=401, detail="OTP verification failed")
+
+            # Update phone_verified in profiles
+            user_id = response.user.id
+            update_resp = client.table("profiles").update({
+                "phone_number": phone_number,
+                "phone_verified": True
+            }).eq("id", user_id).execute()
+
             return {
                 "session": response.session,
-                "user": response.user
+                "user": response.user,
+                "profile_update": update_resp.data
             }
         except Exception as e:
             print(f"OTP verification failed: {str(e)}")
             raise HTTPException(status_code=400, detail="Invalid OTP")
+'''
