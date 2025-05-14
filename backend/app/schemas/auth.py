@@ -32,3 +32,6 @@ class ConfirmResetRequest(BaseModel):
 class VerifyOTPRequest(BaseModel):
     phone_number: str
     token: str'''
+
+class OAuthCodePayload(BaseModel):
+    code: str

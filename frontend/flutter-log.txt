@@ -1,0 +1,35 @@
+Launching lib/main.dart on sdk gphone64 x86 64 in debug mode...
+Running Gradle task 'assembleDebug'...                             10.0s
+✓ Built build/app/outputs/flutter-apk/app-debug.apk
+Installing build/app/outputs/flutter-apk/app-debug.apk...           3.8s
+I/flutter ( 5768): [IMPORTANT:flutter/shell/platform/android/android_context_gl_impeller.cc(104)] Using the Impeller rendering backend (OpenGLES).
+Syncing files to device sdk gphone64 x86 64...                     237ms
+
+Flutter run key commands.
+r Hot reload. 🔥🔥🔥
+R Hot restart.
+h List all available interactive commands.
+d Detach (terminate "flutter run" but leave application running).
+c Clear the screen
+q Quit (terminate the application on the device).
+
+A Dart VM Service on sdk gphone64 x86 64 is available at: http://127.0.0.1:33939/naztgEAy0ow=/
+The Flutter DevTools debugger and profiler on sdk gphone64 x86 64 is available at: http://127.0.0.1:9101?uri=http://127.0.0.1:33939/naztgEAy0ow=/
+I/Choreographer( 5768): Skipped 72 frames!  The application may be doing too much work on its main thread.
+I/xample.groupify( 5768): Compiler allocated 5106KB to compile void android.view.ViewRootImpl.performTraversals()
+I/WindowExtensionsImpl( 5768): Initializing Window Extensions, vendor API level=9, activity embedding enabled=true
+W/HWUI    ( 5768): Image decoding logging dropped!
+W/HWUI    ( 5768): Image decoding logging dropped!
+W/HWUI    ( 5768): Image decoding logging dropped!
+W/HWUI    ( 5768): Image decoding logging dropped!
+W/HWUI    ( 5768): Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...
+W/HWUI    ( 5768): Failed to initialize 101010-2 format, error = EGL_SUCCESS
+W/xample.groupify( 5768): Verification of void androidx.core.view.WindowInsetsControllerCompat.<init>(android.view.Window, android.view.View) took 232.315ms (253.97 bytecodes/s) (0B arena alloc)
+W/xample.groupify( 5768): Verification of void kotlinx.coroutines.DispatchedTaskKt.dispatch(kotlinx.coroutines.DispatchedTask, int) took 146.755ms (551.94 bytecodes/s) (0B arena alloc)
+I/Choreographer( 5768): Skipped 1199 frames!  The application may be doing too much work on its main thread.
+E/SurfaceSyncGroup( 5768): Failed to receive transaction ready in 1000ms. Marking SurfaceSyncGroup(wmsSync-VRI[MainActivity]#2) as ready
+E/SurfaceSyncGroup( 5768): Failed to receive transaction ready in 1000ms. Marking SurfaceSyncGroup(VRI[MainActivity]#3) as ready
+I/xample.groupify( 5768): Waiting for a blocking GC ProfileSaver
+I/HWUI    ( 5768): Davey! duration=46868ms; Flags=1, FrameTimelineVsyncId=16804, IntendedVsync=45912321411683, Vsync=45932304744217, InputEventId=0, HandleInputStart=45932521412055, AnimationStart=45932521414660, PerformTraversalsStart=45932521425541, DrawStart=45955915764402, FrameDeadline=45912338078349, FrameStartTime=45932321001605, FrameInterval=16666666, WorkloadTarget=16666666, SyncQueued=45956133439318, SyncStart=45956332141243, IssueDrawCommandsStart=45956559182554, SwapBuffers=45958504837447, FrameCompleted=45959388828608, DequeueBufferDuration=444168692, QueueBufferDuration=238713405, GpuCompleted=45958941726914, SwapBuffersCompleted=45959388828608, DisplayPresentTime=0, CommandSubmissionCompleted=45958504837447, 
+W/xample.groupify( 5768): Suspending all threads took: 188.048ms
+W/xample.groupify( 5768): Verification of void androidx.profileinstaller.ProfileInstaller.<clinit>() took 896.497ms (16.73 bytecodes/s) (0B arena alloc)

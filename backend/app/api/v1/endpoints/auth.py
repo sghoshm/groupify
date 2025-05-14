@@ -1,13 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Header, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Header, Request, Body
 from supabase import Client, create_client
 from backend.app.services.auth_service import AuthService
 from backend.app.utils.supabase_client import get_supabase_client
 from backend.app.schemas.auth import (
-    UserCreate, UserLogin, Token, RefreshTokenRequest, PasswordChange,
-    ResetPasswordRequest, ConfirmResetRequest, PhoneNumberRequest,
-    VerifyOTPRequest
+    UserCreate, UserLogin, Token, RefreshTokenRequest, PasswordChange, OAuthCodePayload,
+    ResetPasswordRequest, ConfirmResetRequest, 
+    #PhoneNumberRequest, VerifyOTPRequest
 )
 import os
+import traceback
 
 router = APIRouter()
 
@@ -111,6 +112,27 @@ def oauth_redirect(provider: str, request: Request):
             status_code=500,
             detail=f"Unexpected error while generating OAuth URL: {str(e)}"
         )
+
+@router.post("/oauth/exchange")
+def oauth_exchange_code(
+    payload: OAuthCodePayload,
+    client: Client = Depends(get_supabase_client)
+):
+    try:
+        response = client.auth.exchange_code_for_session({"code": payload.code})
+        if not response.session:
+            raise HTTPException(status_code=401, detail="OAuth exchange failed")
+
+        return {
+            "access_token": response.session.access_token,
+            "refresh_token": response.session.refresh_token,
+            "token_type": "bearer"
+        }
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Exchange error: {e}")
+
+
 '''
 @router.post("/login/phone/send", summary="Send OTP to phone number")
 def send_otp(data: PhoneNumberRequest):
