@@ -2,20 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:groupify/services/auth_service.dart';
 
-class AuthOptionsScreen extends StatefulWidget {
-  const AuthOptionsScreen({super.key});
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
 
   @override
-  State<AuthOptionsScreen> createState() => _AuthOptionsScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _AuthOptionsScreenState extends State<AuthOptionsScreen> {
+class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final AuthService _authService = AuthService();
 
-  final _authService = AuthService();
+  bool _isLoading = false;
 
-  Future<void> _handleSignup() async {
+  Future<void> _handleLogin() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
@@ -26,16 +27,17 @@ class _AuthOptionsScreenState extends State<AuthOptionsScreen> {
       return;
     }
 
+    setState(() => _isLoading = true);
+
     try {
-      await _authService.signup(email, password);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Verification Email Sent! Verify and log in.')),
-      );
+      await _authService.login(email, password);
+      Navigator.pushReplacementNamed(context, '/home');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Signup failed: $e')),
+        SnackBar(content: Text('Login failed: $e')),
       );
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
 
@@ -86,6 +88,7 @@ class _AuthOptionsScreenState extends State<AuthOptionsScreen> {
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
+                    // ignore: deprecated_member_use
                     color: Colors.black.withOpacity(0.05),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
@@ -98,7 +101,7 @@ class _AuthOptionsScreenState extends State<AuthOptionsScreen> {
                   Image.asset('assets/images/logo.png', height: 60),
                   const SizedBox(height: 20),
                   const Text(
-                    'Sign up to Groupify',
+                    'Log in to Groupify',
                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 24),
@@ -107,7 +110,8 @@ class _AuthOptionsScreenState extends State<AuthOptionsScreen> {
                     decoration: InputDecoration(
                       labelText: 'Email address',
                       border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12)),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -117,7 +121,8 @@ class _AuthOptionsScreenState extends State<AuthOptionsScreen> {
                     decoration: InputDecoration(
                       labelText: 'Password',
                       border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12)),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -132,8 +137,8 @@ class _AuthOptionsScreenState extends State<AuthOptionsScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      onPressed: _handleSignup,
-                      child: const Text('Sign up'),
+                      onPressed: _isLoading ? null : _handleLogin,
+                      child: Text(_isLoading ? 'Logging in...' : 'Log in'),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -181,10 +186,10 @@ class _AuthOptionsScreenState extends State<AuthOptionsScreen> {
                   const SizedBox(height: 20),
                   TextButton(
                     onPressed: () {
-                      Navigator.pushNamed(context, '/login');
+                      Navigator.pushNamed(context, '/auth-options');
                     },
                     child: const Text(
-                      'Already have an account? Log in',
+                      'Don’t have an account? Sign up',
                       style: TextStyle(color: Colors.blue),
                     ),
                   ),

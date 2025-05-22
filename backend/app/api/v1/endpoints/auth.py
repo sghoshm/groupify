@@ -113,13 +113,15 @@ def oauth_redirect(provider: str, request: Request):
             detail=f"Unexpected error while generating OAuth URL: {str(e)}"
         )
 
-@router.post("/oauth/exchange")
+'''@router.post("/oauth/exchange")
 def oauth_exchange_code(
     payload: OAuthCodePayload,
     client: Client = Depends(get_supabase_client)
 ):
     try:
+        # Wrap code in a dict with key 'code'
         response = client.auth.exchange_code_for_session({"code": payload.code})
+        
         if not response.session:
             raise HTTPException(status_code=401, detail="OAuth exchange failed")
 
@@ -129,11 +131,11 @@ def oauth_exchange_code(
             "token_type": "bearer"
         }
     except Exception as e:
+        import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Exchange error: {e}")
 
 
-'''
 @router.post("/login/phone/send", summary="Send OTP to phone number")
 def send_otp(data: PhoneNumberRequest):
     if not data.phone_number.startswith("+"):
