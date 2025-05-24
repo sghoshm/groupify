@@ -32,16 +32,23 @@ class AuthService {
   }
 
   Future<bool> handleOAuthCallback(Uri uri) async {
-    final response = await _client.auth.getSessionFromUrl(uri);
-    final session = response.session;
+    try {
+      final response = await _client.auth.getSessionFromUrl(uri);
 
-    if (session == null || session.user == null) {
-      print("❌ OAuth login failed: No session or user.");
+      if (response.session == null || response.session!.user == null) {
+        print('❌ OAuth login failed: No session or user.');
+        return false;
+      }
+
+      print('✅ Logged in as: ${response.session!.user!.email}');
+      return true;
+    } on AuthApiException catch (e) {
+      print('❌ OAuth error: ${e.message} (code: ${e.statusCode})');
+      return false;
+    } catch (e) {
+      print('❌ Unexpected error during OAuth callback: $e');
       return false;
     }
-
-    print("✅ Logged in as: ${session.user!.email}");
-    return true;
   }
 
   OAuthProvider _getProvider(String provider) {
@@ -64,11 +71,11 @@ class AuthService {
     final response = await _client.auth.getSessionFromUrl(uri);
     final session = response.session;
 
-    if (session == null || session.user == null) {
-      throw Exception("OAuth login failed: No session or user.");
+    if (session.user == null) {
+      throw Exception('OAuth login failed: No session or user.');
     }
 
-    print("✅ Logged in as: ${session.user!.email}");
+    print('✅ Logged in as: ${session.user.email}');
   }
 
   Future<void> login(String email, String password) async {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:groupify/services/auth_service.dart';
+import 'package:groupify/screens/home/home_screen.dart';
 
 class AuthOptionsScreen extends StatefulWidget {
   const AuthOptionsScreen({super.key});
@@ -86,6 +87,7 @@ class _AuthOptionsScreenState extends State<AuthOptionsScreen> {
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
+                    // ignore: deprecated_member_use
                     color: Colors.black.withOpacity(0.05),
                     blurRadius: 20,
                     offset: const Offset(0, 10),

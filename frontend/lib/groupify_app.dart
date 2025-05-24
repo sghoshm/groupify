@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:app_links/app_links.dart';
 import 'package:groupify/screens/auth/login_screen.dart';
+import 'package:groupify/screens/home/home_screen.dart';
 import 'package:groupify/screens/welcome_screen.dart';
 import 'package:groupify/screens/auth/auth_options_screen.dart';
 import 'package:groupify/services/auth_service.dart';
@@ -74,11 +75,11 @@ class _DeepLinkHandlerWrapperState extends State<DeepLinkHandlerWrapper> {
         if (success) {
           Navigator.pushReplacementNamed(context, '/home');
         } else {
-          _showError("OAuth failed. Please try again without closing the app.");
+          _showError('OAuth failed. Please try again without closing the app.');
         }
       } catch (e) {
         if (!mounted) return;
-        _showError("OAuth error: $e");
+        _showError('OAuth error: $e');
       }
     }
   }
@@ -98,21 +99,5 @@ class _DeepLinkHandlerWrapperState extends State<DeepLinkHandlerWrapper> {
   @override
   Widget build(BuildContext context) {
     return const WelcomeScreen(); // Shown initially while waiting for any link
-  }
-}
-
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text(
-          '🎉 Welcome to Groupify!',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-      ),
-    );
   }
 }

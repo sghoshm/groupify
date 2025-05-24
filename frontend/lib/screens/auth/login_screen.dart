@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:groupify/services/auth_service.dart';
+import 'package:dio/dio.dart';
+import 'package:groupify/screens/home/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -32,9 +34,15 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await _authService.login(email, password);
       Navigator.pushReplacementNamed(context, '/home');
-    } catch (e) {
+    } on DioException catch (e) {
+      final message = e.response?.data['detail'] ?? 'Unexpected login error.';
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed: $e')),
+        SnackBar(content: Text(message)),
+      );
+    } catch (e) {
+      // Catch anything else (e.g. runtime exception)
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Login failed: ${e.toString()}')),
       );
     } finally {
       setState(() => _isLoading = false);
